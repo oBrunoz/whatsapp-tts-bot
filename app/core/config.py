@@ -15,6 +15,8 @@ class Settings(BaseSettings):
 
     STORAGE_BUCKET_NAME: str
     SIGNED_URL_EXPIRATION: timedelta = timedelta(hours=1)
+    STORAGE_BUCKET_DESTINATION: str
+    STORAGE_CONTENT_TYPE: str
 
     class Config:
         env_file = ".env"
