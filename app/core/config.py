@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     STORAGE_BUCKET_DESTINATION: str
     STORAGE_CONTENT_TYPE: str
 
+    DATABASE_URI: str
+
     class Config:
         env_file = ".env"
 
