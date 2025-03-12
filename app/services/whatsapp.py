@@ -1,3 +1,4 @@
+import uuid
 from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 from app.core.config import Settings
@@ -21,34 +22,39 @@ class WhatsappService:
             Processa messagens recebidas do webhook do twilio
         """
         try:
-            message_sid = payload.get('MessageSid')
+            message_sid = str(uuid.uuid4())
             from_number = payload.get('From', '').replace('whatsapp:', '')
             message_text = payload.get('Body', '')
             media_url = payload.get('MediaUrl0')
 
-            # CRIAR SERVIÇO DE ENVIO DE MESSAGEM
+            message = await Message.create(
+                message_sid,
+                from_number,
+                message_text,
+                # media_url
+            )
 
             logger.info(f"Mensagem processada: {message_sid}")
-            return ...
+            return message
         
         except Exception as e:
             logger.error(f"Erro ao processar mensagem: {e}")
             raise
 
-    async def send_text_message(self, to_number: str, message: str) -> Optional[str]:
+    def send_text_message(self, to_number: str, message: str) -> Optional[str]:
         """
             Envia mensagem de texto via whatsapp
         """
         try:
-            if not to_number.startswith("whatsapp: "):
+            if not to_number.startswith("whatsapp:"):
                 to_number = f'whatsapp:{to_number}'
             
-            message = await self.client.messages.create(
+            message = self.client.messages.create(
                 from_=f'whatsapp:{self.whatsapp_number}',
                 body=message,
                 to=to_number
             )
-
+        
             logger.info(f"Messagem enviada: {message.sid}")
             return message.sid
         
@@ -58,7 +64,7 @@ class WhatsappService:
         except Exception as e:
             logger.error(f"Erro ao enviar mensagem: {str(e)}")
     
-    async def send_audio_message(self, to_number:str, audio_url:str) -> Optional[str]:
+    def send_audio_message(self, to_number:str, audio_url:str) -> Optional[str]:
         """
             Envia mensagem de áudio via whatsapp
         """
@@ -66,7 +72,7 @@ class WhatsappService:
             if not to_number.startswith('whatsapp:'):
                 to_number = f'whatsapp:{to_number}'
 
-            message = await self.client.messages.create(
+            message = self.client.messages.create(
                 from_=f'whatsapp:{self.whatsapp_number}',
                 media_url=[audio_url],
                 to=to_number
